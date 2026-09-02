@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12, 3.13]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Run tests
+        run: pytest -q
+  compose_integration:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Check Docker availability
+        run: |
+          docker info
+
+      - name: Ensure docker compose available
+        run: |
+          docker compose version || (sudo apt-get update && sudo apt-get install -y docker-compose-plugin)
+
+      - name: Build and start services with docker-compose
+        run: |
+          docker compose up -d --build
+
+      - name: Wait for app readiness (longer, with logs on failure)
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            echo "waiting for app readiness (attempt $i)";
+            if curl -fsS http://localhost:8000/ready; then
+              echo "app ready" && exit 0
+            fi
+            sleep 3
+          done
+          echo "Service did not become ready";
+          docker compose ps || true
+          docker compose logs app || true
+          docker compose logs tests || true
+          exit 1
+
+      - name: Run integration tests in compose
+        run: |
+          docker compose run --rm tests
+
+      - name: Tear down compose
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+      - name: Run readiness probe tests
+        run: pytest -q tests/test_ready.py

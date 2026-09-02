@@ -1,0 +1,17 @@
+# Core MCP server
+# Pinned to the 1.x line, which exposes the documented
+# mcp.server.fastmcp.FastMCP high-level API used in server.py.
+mcp[cli]>=1.2.0,<2.0.0
+
+# HTTP + data validation
+requests>=2.31.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+
+# Optional REST API wrapper (not required to run the MCP server itself)
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
+# Testing
+pytest>=8.0.0
+pytest-mock>=3.12.0
