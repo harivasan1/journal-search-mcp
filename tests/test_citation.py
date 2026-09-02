@@ -1,4 +1,5 @@
 """Unit tests for tools/citation.py (get_citations, related_papers, export_citation)."""
+
 from unittest.mock import patch
 
 import pytest

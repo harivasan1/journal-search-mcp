@@ -8,6 +8,7 @@ Provides:
 - A simple per-service client-side rate limiter (throttle).
 - Consistent error translation into JournalSearchError subclasses.
 """
+
 import threading
 import time
 from typing import Any, Dict, Optional

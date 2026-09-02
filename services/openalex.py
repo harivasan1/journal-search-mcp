@@ -6,6 +6,7 @@ journals covering ~250M+ works. No API key is required. We send a
 contact email on every request to join the "polite pool," which
 grants higher and more stable rate limits.
 """
+
 from typing import Any, Dict, List, Optional
 
 from config import CONTACT_EMAIL, DEFAULT_PAGE_SIZE, OPENALEX_BASE_URL
@@ -83,8 +84,14 @@ def search_works(
           or "publication_date:desc". None means relevance order.
     """
     cache_key = (
-        "search_works", keyword, str(year), str(author), str(journal),
-        str(sort), str(page), str(per_page),
+        "search_works",
+        keyword,
+        str(year),
+        str(author),
+        str(journal),
+        str(sort),
+        str(page),
+        str(per_page),
     )
     cached = cache.get(*cache_key)
     if cached is not None:
@@ -109,7 +116,9 @@ def search_works(
     if sort:
         params["sort"] = sort
 
-    data = get_json(f"{OPENALEX_BASE_URL}/works", params=params, headers=_headers(), service=SERVICE_NAME)
+    data = get_json(
+        f"{OPENALEX_BASE_URL}/works", params=params, headers=_headers(), service=SERVICE_NAME
+    )
     results = [_work_to_dict(w) for w in data.get("results", [])]
     cache.set(*cache_key, results)
     return results
@@ -129,7 +138,9 @@ def get_work(identifier: str) -> Dict[str, Any]:
         url = f"{OPENALEX_BASE_URL}/works/{identifier}"
 
     try:
-        data = get_json(url, params={"mailto": CONTACT_EMAIL}, headers=_headers(), service=SERVICE_NAME)
+        data = get_json(
+            url, params={"mailto": CONTACT_EMAIL}, headers=_headers(), service=SERVICE_NAME
+        )
     except Exception as exc:
         raise NotFoundError(f"No paper found for identifier: {identifier}") from exc
 
@@ -146,7 +157,9 @@ def search_authors(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[st
         return cached
 
     params = {"search": name, "per_page": per_page, "mailto": CONTACT_EMAIL}
-    data = get_json(f"{OPENALEX_BASE_URL}/authors", params=params, headers=_headers(), service=SERVICE_NAME)
+    data = get_json(
+        f"{OPENALEX_BASE_URL}/authors", params=params, headers=_headers(), service=SERVICE_NAME
+    )
 
     results = []
     for a in data.get("results", []):
@@ -154,14 +167,16 @@ def search_authors(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[st
         if isinstance(last_inst, dict):
             last_inst = [last_inst]
         affiliation = last_inst[0].get("display_name") if last_inst else None
-        results.append({
-            "name": a.get("display_name"),
-            "affiliation": affiliation,
-            "h_index": (a.get("summary_stats") or {}).get("h_index"),
-            "citation_count": a.get("cited_by_count", 0),
-            "works_count": a.get("works_count", 0),
-            "openalex_id": (a.get("id") or "").replace("https://openalex.org/", "") or None,
-        })
+        results.append(
+            {
+                "name": a.get("display_name"),
+                "affiliation": affiliation,
+                "h_index": (a.get("summary_stats") or {}).get("h_index"),
+                "citation_count": a.get("cited_by_count", 0),
+                "works_count": a.get("works_count", 0),
+                "openalex_id": (a.get("id") or "").replace("https://openalex.org/", "") or None,
+            }
+        )
     cache.set(*cache_key, results)
     return results
 
@@ -174,19 +189,23 @@ def search_sources(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[st
         return cached
 
     params = {"search": name, "per_page": per_page, "mailto": CONTACT_EMAIL}
-    data = get_json(f"{OPENALEX_BASE_URL}/sources", params=params, headers=_headers(), service=SERVICE_NAME)
+    data = get_json(
+        f"{OPENALEX_BASE_URL}/sources", params=params, headers=_headers(), service=SERVICE_NAME
+    )
 
     results = []
     for s in data.get("results", []):
         issn_list = s.get("issn") or []
-        results.append({
-            "name": s.get("display_name"),
-            "publisher": s.get("host_organization_name"),
-            "issn": issn_list[0] if issn_list else None,
-            "homepage": s.get("homepage_url"),
-            "works_count": s.get("works_count", 0),
-            "openalex_id": (s.get("id") or "").replace("https://openalex.org/", "") or None,
-        })
+        results.append(
+            {
+                "name": s.get("display_name"),
+                "publisher": s.get("host_organization_name"),
+                "issn": issn_list[0] if issn_list else None,
+                "homepage": s.get("homepage_url"),
+                "works_count": s.get("works_count", 0),
+                "openalex_id": (s.get("id") or "").replace("https://openalex.org/", "") or None,
+            }
+        )
     cache.set(*cache_key, results)
     return results
 
@@ -199,16 +218,20 @@ def search_concepts(query: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[
         return cached
 
     params = {"search": query, "per_page": per_page, "mailto": CONTACT_EMAIL}
-    data = get_json(f"{OPENALEX_BASE_URL}/concepts", params=params, headers=_headers(), service=SERVICE_NAME)
+    data = get_json(
+        f"{OPENALEX_BASE_URL}/concepts", params=params, headers=_headers(), service=SERVICE_NAME
+    )
 
     results = []
     for c in data.get("results", []):
-        results.append({
-            "id": (c.get("id") or "").replace("https://openalex.org/", ""),
-            "name": c.get("display_name"),
-            "level": c.get("level"),
-            "works_count": c.get("works_count", 0),
-        })
+        results.append(
+            {
+                "id": (c.get("id") or "").replace("https://openalex.org/", ""),
+                "name": c.get("display_name"),
+                "level": c.get("level"),
+                "works_count": c.get("works_count", 0),
+            }
+        )
 
     cache.set(*cache_key, results)
     return results

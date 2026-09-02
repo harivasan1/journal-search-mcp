@@ -5,6 +5,7 @@ Backs the `open_access_pdf` MCP tool. Only returns links surfaced by
 OpenAlex / Semantic Scholar's own open-access indexes (e.g. Unpaywall
 data) — no scraping or paywall bypassing is performed.
 """
+
 from typing import Any, Dict
 
 from services import openalex, semanticscholar

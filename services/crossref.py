@@ -6,6 +6,7 @@ holds authoritative bibliographic metadata (authors, volume, issue,
 pages, publisher) for the vast majority of DOIs. No API key is
 required. Used mainly to power accurate citation exports.
 """
+
 from typing import Any, Dict
 
 from config import CONTACT_EMAIL, CROSSREF_BASE_URL

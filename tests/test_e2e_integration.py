@@ -7,18 +7,58 @@ client = TestClient(app)
 
 def test_e2e_search_to_export_and_pdf(monkeypatch):
     # Mock OpenAlex search_works and get_work
-    monkeypatch.setattr("services.openalex.search_works", lambda **kwargs: [{"title": "FindMe", "doi": "10.1/e2e", "keywords": ["x"]}])
-    monkeypatch.setattr("services.openalex.get_work", lambda identifier: {"title": "My Paper", "doi": identifier, "open_access_pdf": "https://example.com/p.pdf"})
+    monkeypatch.setattr(
+        "services.openalex.search_works",
+        lambda **kwargs: [{"title": "FindMe", "doi": "10.1/e2e", "keywords": ["x"]}],
+    )
+    monkeypatch.setattr(
+        "services.openalex.get_work",
+        lambda identifier: {
+            "title": "My Paper",
+            "doi": identifier,
+            "open_access_pdf": "https://example.com/p.pdf",
+        },
+    )
 
     # Mock Semantic Scholar citation and related endpoints
-    monkeypatch.setattr("services.semanticscholar.get_paper_by_doi", lambda doi, fields=None: {"title": "My Paper", "citationCount": 1, "referenceCount": 0})
-    monkeypatch.setattr("services.semanticscholar.get_citations", lambda doi, limit=20: [{"title": "Cite1", "year": 2020}])
-    monkeypatch.setattr("services.semanticscholar.get_references", lambda doi, limit=20: [{"title": "Ref1", "year": 2018}])
-    monkeypatch.setattr("services.semanticscholar.get_recommendations", lambda doi, limit=10: [{"title": "Rel1", "year": 2019, "externalIds": {"DOI": "10.1/r"}}])
+    monkeypatch.setattr(
+        "services.semanticscholar.get_paper_by_doi",
+        lambda doi, fields=None: {"title": "My Paper", "citationCount": 1, "referenceCount": 0},
+    )
+    monkeypatch.setattr(
+        "services.semanticscholar.get_citations",
+        lambda doi, limit=20: [{"title": "Cite1", "year": 2020}],
+    )
+    monkeypatch.setattr(
+        "services.semanticscholar.get_references",
+        lambda doi, limit=20: [{"title": "Ref1", "year": 2018}],
+    )
+    monkeypatch.setattr(
+        "services.semanticscholar.get_recommendations",
+        lambda doi, limit=10: [{"title": "Rel1", "year": 2019, "externalIds": {"DOI": "10.1/r"}}],
+    )
 
     # Mock Crossref for export
-    monkeypatch.setattr("services.crossref.get_work_by_doi", lambda doi: {"title": ["My Paper"], "author": [{"given": "A", "family": "B"}], "container-title": ["J"], "published": {"date-parts": [[2021]]}, "DOI": doi})
-    monkeypatch.setattr("services.crossref.extract_citation_fields", lambda message: {"title": "My Paper", "authors": [{"given": "A", "family": "B"}], "journal": "J", "year": 2021, "doi": message.get("DOI")})
+    monkeypatch.setattr(
+        "services.crossref.get_work_by_doi",
+        lambda doi: {
+            "title": ["My Paper"],
+            "author": [{"given": "A", "family": "B"}],
+            "container-title": ["J"],
+            "published": {"date-parts": [[2021]]},
+            "DOI": doi,
+        },
+    )
+    monkeypatch.setattr(
+        "services.crossref.extract_citation_fields",
+        lambda message: {
+            "title": "My Paper",
+            "authors": [{"given": "A", "family": "B"}],
+            "journal": "J",
+            "year": 2021,
+            "doi": message.get("DOI"),
+        },
+    )
 
     # 1) Search
     r = client.get("/search", params={"keyword": "FindMe"})
@@ -50,12 +90,22 @@ def test_e2e_search_to_export_and_pdf(monkeypatch):
 
 def test_e2e_author_journal_search_and_summary(monkeypatch):
     # Mock author and journal search
-    monkeypatch.setattr("services.openalex.search_authors", lambda name, per_page=10: [{"name": "Auth1"}])
-    monkeypatch.setattr("services.openalex.search_sources", lambda name, per_page=10: [{"name": "Jour1"}])
+    monkeypatch.setattr(
+        "services.openalex.search_authors", lambda name, per_page=10: [{"name": "Auth1"}]
+    )
+    monkeypatch.setattr(
+        "services.openalex.search_sources", lambda name, per_page=10: [{"name": "Jour1"}]
+    )
 
     # Mock summary backends
-    monkeypatch.setattr("services.semanticscholar.get_paper_by_doi", lambda doi, fields=None: {"title": "T", "abstract": None, "tldr": None})
-    monkeypatch.setattr("services.openalex.get_work", lambda doi: {"abstract": "This is an abstract. It has two sentences."})
+    monkeypatch.setattr(
+        "services.semanticscholar.get_paper_by_doi",
+        lambda doi, fields=None: {"title": "T", "abstract": None, "tldr": None},
+    )
+    monkeypatch.setattr(
+        "services.openalex.get_work",
+        lambda doi: {"abstract": "This is an abstract. It has two sentences."},
+    )
 
     ra = client.get("/author", params={"author_name": "Auth1"})
     rj = client.get("/journal", params={"journal_name": "Jour1"})

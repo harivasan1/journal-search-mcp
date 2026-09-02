@@ -1,4 +1,5 @@
 """Unit tests for tools/pdf.py (open_access_pdf)."""
+
 from unittest.mock import patch
 
 import pytest

@@ -1,4 +1,5 @@
 """Unit tests for tools/author.py (search_author)."""
+
 from unittest.mock import patch
 
 import pytest

@@ -3,6 +3,7 @@ MCP tool implementation for author search.
 
 Backs the `search_author` MCP tool.
 """
+
 from typing import Any, Dict
 
 from services import openalex

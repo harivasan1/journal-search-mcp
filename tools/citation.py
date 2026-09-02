@@ -5,6 +5,7 @@ citation export.
 Backs the `get_citations`, `related_papers`, and `export_citation`
 MCP tools.
 """
+
 from typing import Any, Dict
 
 from services import crossref, openalex, semanticscholar
@@ -37,9 +38,7 @@ def get_citations(doi: str, limit: int = 20) -> Dict[str, Any]:
         "title": paper.get("title"),
         "citation_count": paper.get("citationCount", 0),
         "reference_count": paper.get("referenceCount", 0),
-        "citing_papers": [
-            {"title": p.get("title"), "year": p.get("year")} for p in citing if p
-        ],
+        "citing_papers": [{"title": p.get("title"), "year": p.get("year")} for p in citing if p],
         "referenced_papers": [
             {"title": p.get("title"), "year": p.get("year")} for p in references if p
         ],
@@ -94,7 +93,8 @@ def export_citation(doi: str, style: str = "apa") -> Dict[str, Any]:
         work = openalex.get_work(doi)
         authors = [
             {"family": a.split()[-1], "given": " ".join(a.split()[:-1])}
-            for a in work.get("authors", []) if a
+            for a in work.get("authors", [])
+            if a
         ]
         fields = {
             "title": work.get("title"),

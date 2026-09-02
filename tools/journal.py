@@ -3,6 +3,7 @@ MCP tool implementation for journal (publication source) search.
 
 Backs the `search_journal` MCP tool.
 """
+
 from typing import Any, Dict
 
 from services import openalex

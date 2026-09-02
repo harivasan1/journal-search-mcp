@@ -5,6 +5,7 @@ Converts normalized paper metadata (a dict with title/authors/journal/
 year/volume/issue/pages/publisher/doi) into formatted citation strings
 for APA, MLA, IEEE, and BibTeX styles.
 """
+
 from typing import Any, Dict, List
 
 
@@ -115,9 +116,10 @@ def to_ieee(fields: Dict[str, Any]) -> str:
 
 def to_bibtex(fields: Dict[str, Any]) -> str:
     authors = fields.get("authors", [])
-    author_str = " and ".join(
-        f"{a.get('family', '')}, {a.get('given', '')}".strip(", ") for a in authors
-    ) or "Unknown Author"
+    author_str = (
+        " and ".join(f"{a.get('family', '')}, {a.get('given', '')}".strip(", ") for a in authors)
+        or "Unknown Author"
+    )
 
     first_author_last = authors[0].get("family", "unknown") if authors else "unknown"
     year = fields.get("year") or "n.d."

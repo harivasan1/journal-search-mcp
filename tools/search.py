@@ -3,6 +3,7 @@ MCP tool implementations for paper search and detailed retrieval.
 
 Backs the `search_papers` and `paper_details` MCP tools.
 """
+
 from typing import Any, Dict, List, Optional
 
 from services import openalex

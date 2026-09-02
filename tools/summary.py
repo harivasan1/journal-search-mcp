@@ -6,6 +6,7 @@ field (an AI-generated one-line summary produced by their SciTLDR
 model) when available, and otherwise falls back to a simple
 abstract-based extractive summary so the tool never returns empty.
 """
+
 import re
 from typing import Any, Dict
 
