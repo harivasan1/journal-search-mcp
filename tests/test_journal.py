@@ -1,4 +1,5 @@
 """Unit tests for tools/journal.py (search_journal)."""
+
 from unittest.mock import patch
 
 import pytest

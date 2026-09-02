@@ -10,6 +10,7 @@ Run with:
 or, with uv:
     uv run server.py
 """
+
 from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
@@ -63,8 +64,13 @@ def search_papers(
     """
     return _safe(
         search.search_papers,
-        keyword=keyword, year=year, author=author, journal=journal,
-        sort_by=sort_by, page=page, per_page=per_page,
+        keyword=keyword,
+        year=year,
+        author=author,
+        journal=journal,
+        sort_by=sort_by,
+        page=page,
+        per_page=per_page,
     )
 
 

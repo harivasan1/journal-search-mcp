@@ -3,6 +3,7 @@ MCP tool implementation for OpenAlex concept lookup.
 
 Backs a `search_concepts` tool used by the HTTP shim.
 """
+
 from typing import Any, Dict, List
 
 from services import openalex

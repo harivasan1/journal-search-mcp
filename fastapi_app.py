@@ -3,6 +3,7 @@
 This file intentionally calls into the existing `tools/` layer rather than
 duplicating business logic. It's a thin shim for non-MCP clients.
 """
+
 import os
 from typing import Optional
 
@@ -69,9 +70,25 @@ def health():
 
 
 @app.get("/search")
-def search_papers(keyword: str, year: Optional[int] = None, author: Optional[str] = None, journal: Optional[str] = None, sort_by: Optional[str] = None, page: int = 1, per_page: int = 10):
+def search_papers(
+    keyword: str,
+    year: Optional[int] = None,
+    author: Optional[str] = None,
+    journal: Optional[str] = None,
+    sort_by: Optional[str] = None,
+    page: int = 1,
+    per_page: int = 10,
+):
     try:
-        return search_tool.search_papers(keyword=keyword, year=year, author=author, journal=journal, sort_by=sort_by, page=page, per_page=per_page)
+        return search_tool.search_papers(
+            keyword=keyword,
+            year=year,
+            author=author,
+            journal=journal,
+            sort_by=sort_by,
+            page=page,
+            per_page=per_page,
+        )
     except JournalSearchError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -170,7 +187,11 @@ def ready():
 
     # Probe OpenAlex (critical)
     try:
-        get_json(f"{OPENALEX_BASE_URL}/works", params={"per_page": 1, "mailto": CONTACT_EMAIL}, service="openalex")
+        get_json(
+            f"{OPENALEX_BASE_URL}/works",
+            params={"per_page": 1, "mailto": CONTACT_EMAIL},
+            service="openalex",
+        )
         services["openalex"] = {"ok": True}
     except APIRequestError as exc:
         services["openalex"] = {"ok": False, "error": str(exc)}

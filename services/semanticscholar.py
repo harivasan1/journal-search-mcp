@@ -7,6 +7,7 @@ recommendations, and an AI-generated one-line "tldr" summary for
 many papers. An API key is optional and only used to raise rate
 limits; the public endpoints work without one.
 """
+
 from typing import Any, Dict, List
 
 from config import SEMANTIC_SCHOLAR_API_KEY, SEMANTIC_SCHOLAR_BASE_URL
@@ -19,8 +20,7 @@ logger = get_logger(__name__)
 SERVICE_NAME = "semantic_scholar"
 
 DEFAULT_FIELDS = (
-    "title,abstract,year,venue,citationCount,referenceCount,"
-    "tldr,openAccessPdf,externalIds,authors"
+    "title,abstract,year,venue,citationCount,referenceCount,tldr,openAccessPdf,externalIds,authors"
 )
 
 

@@ -5,6 +5,7 @@ Loads environment variables (via python-dotenv) and exposes them as
 typed module-level constants. Every value has a sensible default so
 the server runs out of the box with no .env file required.
 """
+
 import os
 from dotenv import load_dotenv
 

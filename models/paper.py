@@ -1,4 +1,5 @@
 """Pydantic models describing academic papers."""
+
 from typing import List, Optional
 
 from pydantic import BaseModel, Field

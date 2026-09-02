@@ -1,4 +1,5 @@
 """Pydantic model describing an author profile."""
+
 from typing import Optional
 
 from pydantic import BaseModel

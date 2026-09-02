@@ -1,4 +1,5 @@
 """Unit tests for tools/summary.py (summarize_paper)."""
+
 from unittest.mock import patch
 
 import pytest

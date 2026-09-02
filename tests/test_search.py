@@ -1,4 +1,5 @@
 """Unit tests for tools/search.py (search_papers, paper_details)."""
+
 from unittest.mock import patch
 
 import pytest

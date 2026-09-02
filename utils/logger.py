@@ -4,6 +4,7 @@ Centralized logging setup.
 Every module calls get_logger(__name__) to get a logger that writes to
 both the console and a rotating-free log file, using a consistent format.
 """
+
 import logging
 
 from config import LOG_LEVEL, LOG_FILE
@@ -17,9 +18,7 @@ def get_logger(name: str) -> logging.Logger:
 
     logger.setLevel(LOG_LEVEL)
 
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s | %(levelname)-8s | %(name)s | %(message)s")
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
