@@ -9,7 +9,9 @@ services:
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/ready || exit 1"]
+      # Use Python stdlib for the healthcheck to avoid depending on curl
+      # The command performs a simple GET to /ready and exits non-zero on failure.
+      test: ["CMD-SHELL", "python - <<'PY'\nimport sys, urllib.request\ntry:\n    r = urllib.request.urlopen('http://localhost:8000/ready', timeout=5)\n    sys.exit(0 if r.getcode() == 200 else 1)\nexcept Exception:\n    sys.exit(1)\nPY"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -19,7 +21,6 @@ services:
     volumes:
       - .:/app:cached
     environment:
-      - SKIP_UPSTREAM_CHECKS=true
       - PYTHONUNBUFFERED=1
     command: pytest -q
     depends_on:
