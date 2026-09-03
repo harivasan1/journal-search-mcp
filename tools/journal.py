@@ -4,13 +4,13 @@ MCP tool implementation for journal (publication source) search.
 Backs the `search_journal` MCP tool.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from services import openalex
 from utils.exceptions import NotFoundError, ValidationInputError
 
 
-def search_journal(journal_name: str) -> Dict[str, Any]:
+def search_journal(journal_name: str) -> dict[str, Any]:
     """
     Search for a journal's publisher, ISSN, homepage, and paper count.
 

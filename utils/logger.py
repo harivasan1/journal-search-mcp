@@ -7,7 +7,7 @@ both the console and a rotating-free log file, using a consistent format.
 
 import logging
 
-from config import LOG_LEVEL, LOG_FILE
+from config import LOG_FILE, LOG_LEVEL
 
 
 def get_logger(name: str) -> logging.Logger:

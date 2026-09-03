@@ -1,11 +1,11 @@
 import threading
 import time
-import requests
 
 import pytest
+import requests
 
+from config import MAX_RETRIES, MIN_REQUEST_INTERVAL
 from utils import http_client
-from config import MIN_REQUEST_INTERVAL, MAX_RETRIES
 from utils.exceptions import APIRequestError
 
 

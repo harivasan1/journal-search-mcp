@@ -7,6 +7,7 @@ the server runs out of the box with no .env file required.
 """
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

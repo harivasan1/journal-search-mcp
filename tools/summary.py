@@ -8,10 +8,10 @@ abstract-based extractive summary so the tool never returns empty.
 """
 
 import re
-from typing import Any, Dict
+from typing import Any
 
 from services import openalex, semanticscholar
-from utils.exceptions import ValidationInputError
+from utils.exceptions import APIRequestError, NotFoundError, ValidationInputError
 
 
 def _clean_doi(doi: str) -> str:
@@ -26,7 +26,7 @@ def _extractive_summary(abstract: str, max_sentences: int = 3) -> str:
     return " ".join(sentences[:max_sentences])
 
 
-def summarize_paper(doi: str) -> Dict[str, Any]:
+def summarize_paper(doi: str) -> dict[str, Any]:
     """
     Generate a short summary, key findings, and practical applications
     for a paper.
@@ -53,7 +53,7 @@ def summarize_paper(doi: str) -> Dict[str, Any]:
         try:
             work = openalex.get_work(doi)
             abstract = work.get("abstract")
-        except Exception:
+        except (APIRequestError, NotFoundError, AttributeError, TypeError, ValueError):
             abstract = None
 
     tldr = (paper.get("tldr") or {}).get("text")

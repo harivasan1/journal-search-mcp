@@ -11,7 +11,7 @@ Provides:
 
 import threading
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -23,7 +23,7 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-_last_request_time: Dict[str, float] = {}
+_last_request_time: dict[str, float] = {}
 _throttle_lock = threading.Lock()
 
 
@@ -57,10 +57,10 @@ _session = _build_session()
 
 def get_json(
     url: str,
-    params: Optional[Dict[str, Any]] = None,
-    headers: Optional[Dict[str, str]] = None,
+    params: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
     service: str = "default",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform a GET request and return the parsed JSON body.
 

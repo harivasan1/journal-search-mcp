@@ -11,7 +11,7 @@ import json
 import sqlite3
 import threading
 import time
-from typing import Any, Optional
+from typing import Any
 
 from config import CACHE_DB_PATH, CACHE_ENABLED, CACHE_TTL_SECONDS
 
@@ -45,7 +45,7 @@ class SQLiteCache:
             )
             conn.commit()
 
-    def get(self, *key_parts: str) -> Optional[Any]:
+    def get(self, *key_parts: str) -> Any | None:
         """Return the cached value for the given key parts, or None if missing/expired."""
         if not CACHE_ENABLED:
             return None

@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-import pytest
 
 from fastapi_app import app
 from utils.exceptions import APIRequestError, NotFoundError

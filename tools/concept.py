@@ -4,13 +4,13 @@ MCP tool implementation for OpenAlex concept lookup.
 Backs a `search_concepts` tool used by the HTTP shim.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from services import openalex
-from utils.exceptions import ValidationInputError, NotFoundError
+from utils.exceptions import NotFoundError, ValidationInputError
 
 
-def search_concepts(query: str) -> List[Dict[str, Any]]:
+def search_concepts(query: str) -> list[dict[str, Any]]:
     if not query or not query.strip():
         raise ValidationInputError("`query` must be a non-empty string.")
 

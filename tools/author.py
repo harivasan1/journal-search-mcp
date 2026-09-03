@@ -4,13 +4,13 @@ MCP tool implementation for author search.
 Backs the `search_author` MCP tool.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from services import openalex
 from utils.exceptions import NotFoundError, ValidationInputError
 
 
-def search_author(author_name: str) -> Dict[str, Any]:
+def search_author(author_name: str) -> dict[str, Any]:
     """
     Search for an author's profile, affiliation, and citation metrics.
 

@@ -7,7 +7,7 @@ contact email on every request to join the "polite pool," which
 grants higher and more stable rate limits.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config import CONTACT_EMAIL, DEFAULT_PAGE_SIZE, OPENALEX_BASE_URL
 from utils.cache import cache
@@ -20,18 +20,18 @@ logger = get_logger(__name__)
 SERVICE_NAME = "openalex"
 
 
-def _headers() -> Dict[str, str]:
+def _headers() -> dict[str, str]:
     return {"User-Agent": f"journal-search-mcp (mailto:{CONTACT_EMAIL})"}
 
 
-def _reconstruct_abstract(inverted_index: Optional[Dict[str, List[int]]]) -> Optional[str]:
+def _reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | None:
     """
     OpenAlex stores abstracts as an inverted index (word -> positions)
     for copyright reasons. Rebuild the plain-text abstract from it.
     """
     if not inverted_index:
         return None
-    positions: Dict[int, str] = {}
+    positions: dict[int, str] = {}
     for word, idxs in inverted_index.items():
         for idx in idxs:
             positions[idx] = word
@@ -41,7 +41,7 @@ def _reconstruct_abstract(inverted_index: Optional[Dict[str, List[int]]]) -> Opt
     return " ".join(ordered)
 
 
-def _work_to_dict(work: Dict[str, Any]) -> Dict[str, Any]:
+def _work_to_dict(work: dict[str, Any]) -> dict[str, Any]:
     """Normalize a raw OpenAlex 'work' object into our internal paper dict."""
     authorships = work.get("authorships", []) or []
     authors = [a.get("author", {}).get("display_name", "") for a in authorships if a.get("author")]
@@ -69,13 +69,13 @@ def _work_to_dict(work: Dict[str, Any]) -> Dict[str, Any]:
 
 def search_works(
     keyword: str,
-    year: Optional[int] = None,
-    author: Optional[str] = None,
-    journal: Optional[str] = None,
-    sort: Optional[str] = None,
+    year: int | None = None,
+    author: str | None = None,
+    journal: str | None = None,
+    sort: str | None = None,
     page: int = 1,
     per_page: int = DEFAULT_PAGE_SIZE,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Search OpenAlex works (papers) by keyword, with optional year,
     author, and journal filters, plus sorting and pagination.
@@ -105,7 +105,7 @@ def search_works(
     if journal:
         filters.append(f"primary_location.source.display_name.search:{journal}")
 
-    params: Dict[str, Any] = {
+    params: dict[str, Any] = {
         "search": keyword,
         "per_page": min(per_page, 50),
         "page": page,
@@ -124,7 +124,7 @@ def search_works(
     return results
 
 
-def get_work(identifier: str) -> Dict[str, Any]:
+def get_work(identifier: str) -> dict[str, Any]:
     """Fetch a single work by OpenAlex ID (e.g. 'W123456789') or DOI."""
     cache_key = ("get_work", identifier)
     cached = cache.get(*cache_key)
@@ -149,7 +149,7 @@ def get_work(identifier: str) -> Dict[str, Any]:
     return result
 
 
-def search_authors(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[str, Any]]:
+def search_authors(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> list[dict[str, Any]]:
     """Search OpenAlex authors by name."""
     cache_key = ("search_authors", name, str(per_page))
     cached = cache.get(*cache_key)
@@ -181,7 +181,7 @@ def search_authors(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[st
     return results
 
 
-def search_sources(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[str, Any]]:
+def search_sources(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> list[dict[str, Any]]:
     """Search OpenAlex sources (journals / conference proceedings / repositories)."""
     cache_key = ("search_sources", name, str(per_page))
     cached = cache.get(*cache_key)
@@ -210,7 +210,7 @@ def search_sources(name: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[st
     return results
 
 
-def search_concepts(query: str, per_page: int = DEFAULT_PAGE_SIZE) -> List[Dict[str, Any]]:
+def search_concepts(query: str, per_page: int = DEFAULT_PAGE_SIZE) -> list[dict[str, Any]]:
     """Search OpenAlex concepts (topics/keywords) by name or query."""
     cache_key = ("search_concepts", query, str(per_page))
     cached = cache.get(*cache_key)

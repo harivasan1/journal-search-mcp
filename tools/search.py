@@ -4,7 +4,7 @@ MCP tool implementations for paper search and detailed retrieval.
 Backs the `search_papers` and `paper_details` MCP tools.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from services import openalex
 from utils.exceptions import ValidationInputError
@@ -22,13 +22,13 @@ _SORT_MAP = {
 
 def search_papers(
     keyword: str,
-    year: Optional[int] = None,
-    author: Optional[str] = None,
-    journal: Optional[str] = None,
-    sort_by: Optional[str] = None,
+    year: int | None = None,
+    author: str | None = None,
+    journal: str | None = None,
+    sort_by: str | None = None,
     page: int = 1,
     per_page: int = 10,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Search for academic papers by keyword, with optional year, author,
     and journal filters, sorting, and pagination.
@@ -71,9 +71,9 @@ def search_papers(
     }
 
 
-def _keyword_suggestions(papers: List[Dict[str, Any]], limit: int = 8) -> List[str]:
+def _keyword_suggestions(papers: list[dict[str, Any]], limit: int = 8) -> list[str]:
     """Derive simple keyword suggestions from the concepts of the top results."""
-    seen: List[str] = []
+    seen: list[str] = []
     for paper in papers:
         for kw in paper.get("keywords", []) or []:
             if kw and kw not in seen:
@@ -83,7 +83,7 @@ def _keyword_suggestions(papers: List[Dict[str, Any]], limit: int = 8) -> List[s
     return seen[:limit]
 
 
-def paper_details(identifier: str) -> Dict[str, Any]:
+def paper_details(identifier: str) -> dict[str, Any]:
     """
     Retrieve full metadata for a single paper by DOI or OpenAlex ID,
     including abstract, keywords, references, and related works.

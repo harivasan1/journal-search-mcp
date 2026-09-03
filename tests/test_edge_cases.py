@@ -1,18 +1,22 @@
-import time
-import json
-import requests
 import pytest
+import requests
 
-from utils import http_client
-from utils.exceptions import APIRequestError, NotFoundError, ValidationInputError
-from services import openalex, crossref, semanticscholar
+from services import crossref, openalex, semanticscholar
+from tools import (
+    citation as citation_tool,
+)
+from tools import (
+    pdf as pdf_tool,
+)
 from tools import (
     search as search_tool,
-    citation as citation_tool,
-    pdf as pdf_tool,
+)
+from tools import (
     summary as summary_tool,
 )
+from utils import http_client
 from utils.cache import cache
+from utils.exceptions import APIRequestError, NotFoundError, ValidationInputError
 
 
 class FakeResp:
@@ -33,13 +37,16 @@ class FakeResp:
 
 def test_get_json_http_errors(monkeypatch):
     codes = [400, 401, 403, 404, 429, 500, 502, 503]
-    for code in codes:
-        exc = requests.exceptions.HTTPError(f"{code} Client Error")
 
+    def make_fake_get(code, exc):
         def fake_get(url, params=None, headers=None, timeout=None):
             return FakeResp(status_code=code, json_data=None, raise_exc=exc)
 
-        monkeypatch.setattr(http_client._session, "get", fake_get)
+        return fake_get
+
+    for code in codes:
+        exc = requests.exceptions.HTTPError(f"{code} Client Error")
+        monkeypatch.setattr(http_client._session, "get", make_fake_get(code, exc))
         with pytest.raises(APIRequestError):
             http_client.get_json("https://example.invalid", service="test")
 

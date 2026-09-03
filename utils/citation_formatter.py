@@ -6,10 +6,10 @@ year/volume/issue/pages/publisher/doi) into formatted citation strings
 for APA, MLA, IEEE, and BibTeX styles.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 
-def _format_authors_apa(authors: List[Dict[str, str]]) -> str:
+def _format_authors_apa(authors: list[dict[str, str]]) -> str:
     parts = []
     for a in authors:
         family = (a.get("family") or "").strip()
@@ -24,7 +24,7 @@ def _format_authors_apa(authors: List[Dict[str, str]]) -> str:
     return ", ".join(parts[:-1]) + ", & " + parts[-1]
 
 
-def _format_authors_mla(authors: List[Dict[str, str]]) -> str:
+def _format_authors_mla(authors: list[dict[str, str]]) -> str:
     if not authors:
         return "Unknown Author"
     first = authors[0]
@@ -34,7 +34,7 @@ def _format_authors_mla(authors: List[Dict[str, str]]) -> str:
     return f"{name}, et al."
 
 
-def _format_authors_ieee(authors: List[Dict[str, str]]) -> str:
+def _format_authors_ieee(authors: list[dict[str, str]]) -> str:
     parts = []
     for a in authors:
         given = (a.get("given") or "").strip()
@@ -44,7 +44,7 @@ def _format_authors_ieee(authors: List[Dict[str, str]]) -> str:
     return ", ".join(p for p in parts if p) or "Unknown Author"
 
 
-def to_apa(fields: Dict[str, Any]) -> str:
+def to_apa(fields: dict[str, Any]) -> str:
     authors = _format_authors_apa(fields.get("authors", []))
     year = fields.get("year") or "n.d."
     title = fields.get("title") or "Untitled"
@@ -69,7 +69,7 @@ def to_apa(fields: Dict[str, Any]) -> str:
     return citation
 
 
-def to_mla(fields: Dict[str, Any]) -> str:
+def to_mla(fields: dict[str, Any]) -> str:
     authors = _format_authors_mla(fields.get("authors", []))
     title = fields.get("title") or "Untitled"
     journal = fields.get("journal")
@@ -92,7 +92,7 @@ def to_mla(fields: Dict[str, Any]) -> str:
     return citation
 
 
-def to_ieee(fields: Dict[str, Any]) -> str:
+def to_ieee(fields: dict[str, Any]) -> str:
     authors = _format_authors_ieee(fields.get("authors", []))
     title = fields.get("title") or "Untitled"
     journal = fields.get("journal")
@@ -114,7 +114,7 @@ def to_ieee(fields: Dict[str, Any]) -> str:
     return citation
 
 
-def to_bibtex(fields: Dict[str, Any]) -> str:
+def to_bibtex(fields: dict[str, Any]) -> str:
     authors = fields.get("authors", [])
     author_str = (
         " and ".join(f"{a.get('family', '')}, {a.get('given', '')}".strip(", ") for a in authors)
@@ -153,7 +153,7 @@ FORMATTERS = {
 }
 
 
-def format_citation(fields: Dict[str, Any], style: str) -> str:
+def format_citation(fields: dict[str, Any], style: str) -> str:
     """Format `fields` into a citation string of the given style."""
     style_key = style.lower().strip()
     formatter = FORMATTERS.get(style_key)

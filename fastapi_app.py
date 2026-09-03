@@ -5,19 +5,20 @@ duplicating business logic. It's a thin shim for non-MCP clients.
 """
 
 import os
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from tools import search as search_tool, author as author_tool, journal as journal_tool
-from tools import citation as citation_tool, summary as summary_tool, pdf as pdf_tool
-from utils.exceptions import JournalSearchError
-from config import OPENALEX_BASE_URL, CROSSREF_BASE_URL, CONTACT_EMAIL
-from utils.http_client import get_json
-from utils.exceptions import APIRequestError
+from config import CONTACT_EMAIL, CROSSREF_BASE_URL, OPENALEX_BASE_URL
+from tools import author as author_tool
+from tools import citation as citation_tool
 from tools import concept as concept_tool
-
+from tools import journal as journal_tool
+from tools import pdf as pdf_tool
+from tools import search as search_tool
+from tools import summary as summary_tool
+from utils.exceptions import APIRequestError, JournalSearchError
+from utils.http_client import get_json
 
 app = FastAPI(title="Journal Search HTTP API")
 
@@ -72,10 +73,10 @@ def health():
 @app.get("/search")
 def search_papers(
     keyword: str,
-    year: Optional[int] = None,
-    author: Optional[str] = None,
-    journal: Optional[str] = None,
-    sort_by: Optional[str] = None,
+    year: int | None = None,
+    author: str | None = None,
+    journal: str | None = None,
+    sort_by: str | None = None,
     page: int = 1,
     per_page: int = 10,
 ):

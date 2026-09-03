@@ -11,8 +11,6 @@ or, with uv:
     uv run server.py
 """
 
-from typing import Optional
-
 from mcp.server.fastmcp import FastMCP
 
 from tools import author, citation, journal, pdf, search, summary
@@ -42,7 +40,7 @@ def _safe(fn, **kwargs):
     except JournalSearchError as exc:
         logger.warning("Tool error in %s: %s", fn.__name__, exc)
         return {"error": str(exc)}
-    except Exception as exc:  # noqa: BLE001 - convert any unexpected error safely
+    except Exception as exc:
         logger.exception("Unexpected error in %s", fn.__name__)
         return {"error": f"Unexpected error: {exc}"}
 
@@ -50,10 +48,10 @@ def _safe(fn, **kwargs):
 @mcp.tool()
 def search_papers(
     keyword: str,
-    year: Optional[int] = None,
-    author: Optional[str] = None,
-    journal: Optional[str] = None,
-    sort_by: Optional[str] = None,
+    year: int | None = None,
+    author: str | None = None,
+    journal: str | None = None,
+    sort_by: str | None = None,
     page: int = 1,
     per_page: int = 10,
 ) -> dict:

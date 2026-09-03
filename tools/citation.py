@@ -6,18 +6,18 @@ Backs the `get_citations`, `related_papers`, and `export_citation`
 MCP tools.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from services import crossref, openalex, semanticscholar
 from utils.citation_formatter import format_citation
-from utils.exceptions import ValidationInputError
+from utils.exceptions import APIRequestError, ValidationInputError
 
 
 def _clean_doi(doi: str) -> str:
     return doi.strip().replace("https://doi.org/", "").replace("http://doi.org/", "")
 
 
-def get_citations(doi: str, limit: int = 20) -> Dict[str, Any]:
+def get_citations(doi: str, limit: int = 20) -> dict[str, Any]:
     """
     Get citation count, citing papers, and referenced papers for a DOI.
 
@@ -45,7 +45,7 @@ def get_citations(doi: str, limit: int = 20) -> Dict[str, Any]:
     }
 
 
-def related_papers(doi: str, limit: int = 10) -> Dict[str, Any]:
+def related_papers(doi: str, limit: int = 10) -> dict[str, Any]:
     """
     Get papers related/similar to the given DOI.
 
@@ -73,7 +73,7 @@ def related_papers(doi: str, limit: int = 10) -> Dict[str, Any]:
     }
 
 
-def export_citation(doi: str, style: str = "apa") -> Dict[str, Any]:
+def export_citation(doi: str, style: str = "apa") -> dict[str, Any]:
     """
     Export a formatted citation for a DOI.
 
@@ -88,7 +88,7 @@ def export_citation(doi: str, style: str = "apa") -> Dict[str, Any]:
     try:
         message = crossref.get_work_by_doi(doi)
         fields = crossref.extract_citation_fields(message)
-    except Exception:
+    except (APIRequestError, AttributeError, TypeError, ValueError, KeyError):
         # Fall back to OpenAlex metadata if Crossref has no record for this DOI.
         work = openalex.get_work(doi)
         authors = [

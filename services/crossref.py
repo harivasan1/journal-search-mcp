@@ -7,11 +7,11 @@ pages, publisher) for the vast majority of DOIs. No API key is
 required. Used mainly to power accurate citation exports.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from config import CONTACT_EMAIL, CROSSREF_BASE_URL
 from utils.cache import cache
-from utils.exceptions import NotFoundError, APIRequestError
+from utils.exceptions import APIRequestError, NotFoundError
 from utils.http_client import get_json
 from utils.logger import get_logger
 
@@ -19,11 +19,11 @@ logger = get_logger(__name__)
 SERVICE_NAME = "crossref"
 
 
-def _headers() -> Dict[str, str]:
+def _headers() -> dict[str, str]:
     return {"User-Agent": f"journal-search-mcp (mailto:{CONTACT_EMAIL})"}
 
 
-def get_work_by_doi(doi: str) -> Dict[str, Any]:
+def get_work_by_doi(doi: str) -> dict[str, Any]:
     """Fetch raw Crossref metadata for a DOI."""
     cache_key = ("crossref_doi", doi)
     cached = cache.get(*cache_key)
@@ -46,7 +46,7 @@ def get_work_by_doi(doi: str) -> Dict[str, Any]:
     return message
 
 
-def extract_citation_fields(message: Dict[str, Any]) -> Dict[str, Any]:
+def extract_citation_fields(message: dict[str, Any]) -> dict[str, Any]:
     """Normalize raw Crossref metadata into fields used by the citation formatter."""
     authors = []
     for a in message.get("author", []) or []:
