@@ -14,10 +14,8 @@ COPY . /app
 COPY healthcheck.py /usr/local/bin/healthcheck.py
 
 RUN mkdir -p /data \
-    && adduser --disabled-password --gecos "" appuser \
-    && chown -R appuser:appuser /data
-
-USER appuser
+  && adduser --disabled-password --gecos "" appuser \
+  && chown -R appuser:appuser /data
 
 EXPOSE 8000
 
@@ -25,3 +23,9 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD ["python", "/usr/local/bin/healthcheck.py"]
 
 CMD ["sh", "-c", "uvicorn fastapi_app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
+# Copy entrypoint which ensures /data ownership and drops privileges to `appuser`.
+COPY docker-entrypoint.py /usr/local/bin/docker-entrypoint.py
+RUN chmod +x /usr/local/bin/docker-entrypoint.py
+
+ENTRYPOINT ["python", "/usr/local/bin/docker-entrypoint.py", "--"]
