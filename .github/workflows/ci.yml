@@ -10,15 +10,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.11, 3.12, 3.13]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -37,7 +38,12 @@ jobs:
         run: ruff format --check .
 
       - name: Run tests
+        # CACHE_DB_PATH points to a writable tmpfs location so SQLite works on
+        # the bare CI runner where /data does not exist.
+        env:
+          CACHE_DB_PATH: /tmp/test_cache.sqlite3
         run: pytest -q
+
   compose_integration:
     needs: build
     runs-on: ubuntu-latest
@@ -46,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Check Docker availability
         run: |
@@ -83,5 +89,3 @@ jobs:
       - name: Tear down compose
         if: always()
         run: docker compose down --volumes --remove-orphans
-      - name: Run readiness probe tests
-        run: pytest -q tests/test_ready.py

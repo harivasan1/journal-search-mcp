@@ -79,9 +79,6 @@ class SQLiteCache:
             if not row:
                 return None
             value, created_at = row
-        if not row:
-            return None
-        value, created_at = row
         if time.time() - created_at > self.ttl:
             self.delete(*key_parts)
             return None
