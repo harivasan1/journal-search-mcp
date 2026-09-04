@@ -26,9 +26,9 @@ def drop_privileges_and_exec(cmd):
             try:
                 os.chown("/data", uid, gid)
                 os.chmod("/data", 0o750)
-            except Exception:
+            except (OSError, PermissionError):
                 # best-effort; continue even if chown/chmod fails
-                pass
+                return
             # drop to appuser
             os.setgid(gid)
             os.setuid(uid)
