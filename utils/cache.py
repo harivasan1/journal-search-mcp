@@ -33,7 +33,8 @@ class SQLiteCache:
         self.db_path = db_path
         self.ttl = ttl
         self._disabled = False
-        self._mem_cache: dict[str, tuple[float, str]] = {}
+        # In-memory fallback stores (json_string, created_at)
+        self._mem_cache: dict[str, tuple[str, float]] = {}
         # Ensure parent directory exists and is writable. If we cannot
         # initialize the SQLite DB due to filesystem permissions, fall back
         # to an in-memory cache (safe for CI; avoids failing tests).
