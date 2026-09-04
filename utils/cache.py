@@ -42,10 +42,9 @@ class SQLiteCache:
             db_dir = os.path.dirname(self.db_path) or "."
             os.makedirs(db_dir, exist_ok=True)
             self._init_db()
-        except Exception as exc:  # pragma: no cover - defensive fallback for CI/container FS issues
-            # Be defensive: any unexpected error opening/initializing the SQLite
-            # DB should not make the application fail. Fall back to an in-memory
-            # cache (safe for CI and tests where volume mounts may be read-only).
+        except (sqlite3.Error, OSError) as exc:  # pragma: no cover - container/FS errors
+            # Fall back to an in-memory cache if SQLite cannot be initialized
+            # due to DB errors (sqlite3.Error) or filesystem issues (OSError).
             warnings.warn(
                 f"SQLite cache unavailable ({exc!r}); falling back to in-memory cache",
                 RuntimeWarning,

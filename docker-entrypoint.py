@@ -6,6 +6,7 @@ This allows the image to perform necessary chown/chmod operations at container
 start time (when volumes are mounted) and still run the main application as a
 non-root user.
 """
+
 import os
 import pwd
 import sys
