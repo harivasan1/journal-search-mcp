@@ -37,7 +37,11 @@ MIN_REQUEST_INTERVAL = float(os.getenv("MIN_REQUEST_INTERVAL", "0.15"))
 
 # ---- Local caching (SQLite) ----
 CACHE_ENABLED = os.getenv("CACHE_ENABLED", "true").lower() == "true"
-CACHE_DB_PATH = os.getenv("CACHE_DB_PATH", "cache.sqlite3")
+# Default the cache DB to a dedicated writable data directory inside the
+# container. This avoids permission issues when the repository is bind-mounted
+# into /app at runtime — /data is a docker-managed volume created in the
+# image and owned by the non-root `appuser`.
+CACHE_DB_PATH = os.getenv("CACHE_DB_PATH", "/data/cache.sqlite3")
 CACHE_TTL_SECONDS = int(os.getenv("CACHE_TTL_SECONDS", "3600"))
 
 # ---- Pagination ----

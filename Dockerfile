@@ -13,8 +13,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend source
 COPY . /app
 # Create a non-root user and set permissions (install happens as root above)
-RUN adduser --disabled-password --gecos "" appuser \
-	&& chown -R appuser:appuser /app
+# Also create a dedicated writable data directory for runtime caches so that
+# non-root `appuser` can write SQLite files and pytest caches even when the
+# repository is mounted into /app by docker-compose on developer machines.
+RUN mkdir -p /data \
+	&& adduser --disabled-password --gecos "" appuser \
+	&& chown -R appuser:appuser /app /data
 
 USER appuser
 

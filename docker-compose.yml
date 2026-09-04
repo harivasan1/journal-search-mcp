@@ -8,6 +8,8 @@ services:
       - SKIP_UPSTREAM_CHECKS=true
     ports:
       - "8000:8000"
+    volumes:
+      - app-data:/data
     healthcheck:
       # Use Python stdlib for the healthcheck to avoid depending on curl
       # The command performs a simple GET to /ready and exits non-zero on failure.
@@ -20,9 +22,14 @@ services:
     build: .
     volumes:
       - .:/app:cached
+      - app-data:/data
     environment:
       - PYTHONUNBUFFERED=1
     command: pytest -q
     depends_on:
       app:
         condition: service_healthy
+
+volumes:
+  app-data:
+    driver: local
