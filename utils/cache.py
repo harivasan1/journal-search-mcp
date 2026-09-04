@@ -8,12 +8,12 @@ which reduces latency and helps stay within fair-use rate limits.
 
 import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
-from typing import Any
-import os
 import warnings
+from typing import Any
 
 from config import CACHE_DB_PATH, CACHE_ENABLED, CACHE_TTL_SECONDS
 
