@@ -27,9 +27,10 @@ EXPOSE 8000
 
 # Healthcheck: lightweight Python stdlib HTTP GET to /ready (no curl required)
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD python - <<'PY'
-import sys, urllib.request
+import sys, urllib.request, os
+port = os.getenv("PORT", "8000")
 try:
-	r = urllib.request.urlopen('http://localhost:8000/ready', timeout=5)
+	r = urllib.request.urlopen(f'http://localhost:{port}/ready', timeout=5)
 	sys.exit(0 if r.getcode() == 200 else 1)
 except Exception:
 	sys.exit(1)
