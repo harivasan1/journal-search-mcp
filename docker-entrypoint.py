@@ -7,9 +7,13 @@ start time (when volumes are mounted) and still run the main application as a
 non-root user.
 """
 
+import logging
 import os
 import pwd
 import sys
+
+logger = logging.getLogger("docker-entrypoint")
+logging.basicConfig(level=logging.INFO)
 
 
 def drop_privileges_and_exec(cmd):
@@ -27,9 +31,8 @@ def drop_privileges_and_exec(cmd):
             try:
                 os.chown("/data", uid, gid)
                 os.chmod("/data", 0o750)
-            except (OSError, PermissionError):
-                # best-effort; continue even if chown/chmod fails
-                return
+            except OSError as exc:
+                logger.warning("Could not chown/chmod /data (%s); continuing anyway", exc)
             # drop to appuser
             os.setgid(gid)
             os.setuid(uid)
