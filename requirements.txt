@@ -10,6 +10,7 @@ python-dotenv>=1.0.0
 
 # Optional REST API wrapper (not required to run the MCP server itself)
 fastapi>=0.110.0
+httpx>=0.27.0
 uvicorn>=0.29.0
 
 # Testing

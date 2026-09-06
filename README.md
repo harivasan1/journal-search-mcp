@@ -86,7 +86,6 @@ journal-search-mcp server/
 ├── TESTING.md
 ├── TROUBLESHOOTING.md
 ├── config.py
-├── cache.sqlite3
 ├── k8s/
 │   └── deployment-readiness.yaml
 ├── models/

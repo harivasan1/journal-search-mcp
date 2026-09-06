@@ -8,9 +8,11 @@ which reduces latency and helps stay within fair-use rate limits.
 
 import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
+import warnings
 from typing import Any
 
 from config import CACHE_DB_PATH, CACHE_ENABLED, CACHE_TTL_SECONDS
@@ -30,7 +32,24 @@ class SQLiteCache:
     def __init__(self, db_path: str = CACHE_DB_PATH, ttl: int = CACHE_TTL_SECONDS):
         self.db_path = db_path
         self.ttl = ttl
-        self._init_db()
+        self._disabled = False
+        # In-memory fallback stores (json_string, created_at)
+        self._mem_cache: dict[str, tuple[str, float]] = {}
+        # Ensure parent directory exists and is writable. If we cannot
+        # initialize the SQLite DB due to filesystem permissions, fall back
+        # to an in-memory cache (safe for CI; avoids failing tests).
+        try:
+            db_dir = os.path.dirname(self.db_path) or "."
+            os.makedirs(db_dir, exist_ok=True)
+            self._init_db()
+        except (sqlite3.Error, OSError) as exc:  # pragma: no cover - container/FS errors
+            # Fall back to an in-memory cache if SQLite cannot be initialized
+            # due to DB errors (sqlite3.Error) or filesystem issues (OSError).
+            warnings.warn(
+                f"SQLite cache unavailable ({exc!r}); falling back to in-memory cache",
+                RuntimeWarning,
+            )
+            self._disabled = True
 
     def _init_db(self) -> None:
         with _lock, sqlite3.connect(self.db_path) as conn:
@@ -50,13 +69,19 @@ class SQLiteCache:
         if not CACHE_ENABLED:
             return None
         key = _make_key(*key_parts)
-        with _lock, sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT value, created_at FROM cache WHERE key = ?", (key,)
-            ).fetchone()
-        if not row:
-            return None
-        value, created_at = row
+        if self._disabled:
+            entry = self._mem_cache.get(key)
+            if not entry:
+                return None
+            value, created_at = entry
+        else:
+            with _lock, sqlite3.connect(self.db_path) as conn:
+                row = conn.execute(
+                    "SELECT value, created_at FROM cache WHERE key = ?", (key,)
+                ).fetchone()
+            if not row:
+                return None
+            value, created_at = row
         if time.time() - created_at > self.ttl:
             self.delete(*key_parts)
             return None
@@ -75,6 +100,9 @@ class SQLiteCache:
             return
         *key_parts, value = key_parts_and_value
         key = _make_key(*key_parts)
+        if self._disabled:
+            self._mem_cache[key] = (json.dumps(value), time.time())
+            return
         with _lock, sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO cache (key, value, created_at) VALUES (?, ?, ?)",
@@ -84,6 +112,9 @@ class SQLiteCache:
 
     def delete(self, *key_parts: str) -> None:
         key = _make_key(*key_parts)
+        if self._disabled:
+            self._mem_cache.pop(key, None)
+            return
         with _lock, sqlite3.connect(self.db_path) as conn:
             conn.execute("DELETE FROM cache WHERE key = ?", (key,))
             conn.commit()

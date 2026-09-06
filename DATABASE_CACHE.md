@@ -1,9 +1,9 @@
-# Database Cache — SQLite (cache.sqlite3)
+# Database Cache — SQLite (runtime cache)
 
-The repository uses a lightweight SQLite file (`cache.sqlite3`) as a local response cache. The cache is intended to reduce upstream API calls, improve latency, and respect provider rate limits. It is not a primary datastore.
+The repository uses a lightweight SQLite file as a local response cache. The cache is intended to reduce upstream API calls, improve latency, and respect provider rate limits. It is not a primary datastore and the runtime location is configurable.
 
 Key points
-- Location: `cache.sqlite3` at repository root (created when `utils/cache.py` stores the first entry).
+- Location: by default the runtime cache file is `/tmp/cache.sqlite3`. This is writable by non-root users on platforms such as Render. The cache is intentionally ephemeral; set `CACHE_DB_PATH` to a mounted writable directory when persistence is available.
 - Why SQLite: Zero-ops local file database that is portable, transactional, and easy to inspect.
 - Cache keys: Typically a hash of service name + endpoint + serialized request parameters. Implementations live in `utils/cache.py`.
 - TTL: The cache TTL is configurable via environment variables (see `config.py` / `.env.example`). On cache miss or TTL expiry the service will fetch fresh data and update the cache.

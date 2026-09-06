@@ -37,7 +37,10 @@ MIN_REQUEST_INTERVAL = float(os.getenv("MIN_REQUEST_INTERVAL", "0.15"))
 
 # ---- Local caching (SQLite) ----
 CACHE_ENABLED = os.getenv("CACHE_ENABLED", "true").lower() == "true"
-CACHE_DB_PATH = os.getenv("CACHE_DB_PATH", "cache.sqlite3")
+# Use /tmp by default because it is writable by the non-root runtime user on
+# platforms such as Render. The cache is intentionally ephemeral; deployments
+# may override this with CACHE_DB_PATH when persistent storage is available.
+CACHE_DB_PATH = os.getenv("CACHE_DB_PATH", "/tmp/cache.sqlite3")
 CACHE_TTL_SECONDS = int(os.getenv("CACHE_TTL_SECONDS", "3600"))
 
 # ---- Pagination ----

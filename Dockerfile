@@ -1,24 +1,31 @@
 FROM python:3.13-slim
 
-# Container environment
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source
 COPY . /app
-# Create a non-root user and set permissions (install happens as root above)
-RUN adduser --disabled-password --gecos "" appuser \
-	&& chown -R appuser:appuser /app
 
-USER appuser
+# Standalone healthcheck script — no curl, no heredoc, valid Dockerfile syntax
+COPY healthcheck.py /usr/local/bin/healthcheck.py
+
+RUN mkdir -p /data \
+  && adduser --disabled-password --gecos "" appuser \
+  && chown -R appuser:appuser /data
 
 EXPOSE 8000
 
-# Default command: run the FastAPI app. CI can override to run tests (docker-compose 'tests' service runs pytest).
-CMD ["uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD ["python", "/usr/local/bin/healthcheck.py"]
+
+CMD ["sh", "-c", "uvicorn fastapi_app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
+# Copy entrypoint which ensures /data ownership and drops privileges to `appuser`.
+COPY docker-entrypoint.py /usr/local/bin/docker-entrypoint.py
+RUN chmod +x /usr/local/bin/docker-entrypoint.py
+
+ENTRYPOINT ["python", "/usr/local/bin/docker-entrypoint.py", "--"]

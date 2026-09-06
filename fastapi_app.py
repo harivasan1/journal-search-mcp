@@ -20,6 +20,20 @@ from tools import summary as summary_tool
 from utils.exceptions import APIRequestError, JournalSearchError
 from utils.http_client import get_json
 
+# Mount MCP Streamable HTTP app at /mcp so MCP clients can use
+# https://<host>/mcp to talk to the existing MCP server implemented
+# in `server.py`. We import the module-level `mcp` instance and
+# mount its StreamableHTTP Starlette app. Keep this lightweight to
+# avoid duplicating any tool logic.
+try:
+    # Import locally defined MCP server (does not call mcp.run())
+    from server import mcp as _mcp  # type: ignore
+except (
+    ImportError,
+    ModuleNotFoundError,
+):  # pragma: no cover - import errors are surfaced at startup
+    _mcp = None
+
 app = FastAPI(title="Journal Search HTTP API")
 
 # Add CORS middleware for API access
@@ -225,4 +239,45 @@ def ready():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("fastapi_app:app", host="127.0.0.1", port=8000, reload=False)
+    port = int(os.getenv("PORT", os.getenv("PORT_RENDER", "8000")))
+    uvicorn.run("fastapi_app:app", host="0.0.0.0", port=port, reload=False)
+
+
+# Mount the MCP Streamable HTTP app under /mcp when available. We do this
+# after the FastAPI app is created so all existing REST endpoints remain
+# unchanged. We set the inner FastMCP streamable path to root ("/") so the
+# mounted application exposes the transport at exactly /mcp.
+if _mcp is not None:
+
+    @app.on_event("startup")
+    async def _mcp_startup():
+        try:
+            # Disable transport security to avoid host validation problems in
+            # simple deployments and tests, then create the streamable app and
+            # mount it under /mcp so the MCP Streamable HTTP transport is
+            # available at POST/GET /mcp.
+            _mcp.settings.transport_security = None
+            _mcp.settings.streamable_http_path = "/"
+            starlette_app = _mcp.streamable_http_app()
+            app.mount("/mcp", starlette_app)
+
+            # Enter the session manager lifespan so the manager's task group
+            # is available to handle incoming requests.
+            cm = _mcp.session_manager.run()
+            await cm.__aenter__()
+            app.state._mcp_cm = cm
+        except (
+            AttributeError,
+            RuntimeError,
+            ValueError,
+        ) as exc:  # pragma: no cover - best-effort startup
+            print("Warning: failed to start/mount MCP streamable-http app:", exc)
+
+    @app.on_event("shutdown")
+    async def _mcp_shutdown():
+        cm = getattr(app.state, "_mcp_cm", None)
+        if cm is not None:
+            try:
+                await cm.__aexit__(None, None, None)
+            except (AttributeError, RuntimeError):
+                print("Warning: exception while shutting down MCP session manager")
