@@ -248,6 +248,7 @@ if __name__ == "__main__":
 # unchanged. We set the inner FastMCP streamable path to root ("/") so the
 # mounted application exposes the transport at exactly /mcp.
 if _mcp is not None:
+
     @app.on_event("startup")
     async def _mcp_startup():
         try:
@@ -265,7 +266,11 @@ if _mcp is not None:
             cm = _mcp.session_manager.run()
             await cm.__aenter__()
             app.state._mcp_cm = cm
-        except (AttributeError, RuntimeError, ValueError) as exc:  # pragma: no cover - best-effort startup
+        except (
+            AttributeError,
+            RuntimeError,
+            ValueError,
+        ) as exc:  # pragma: no cover - best-effort startup
             print("Warning: failed to start/mount MCP streamable-http app:", exc)
 
     @app.on_event("shutdown")
